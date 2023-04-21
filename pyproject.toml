@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "cliff_walk"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.8"
 gymnasium = "^0.28.1"
 
 
