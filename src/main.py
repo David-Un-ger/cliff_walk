@@ -1,40 +1,41 @@
 # https://gymnasium.farama.org/environments/toy_text/cliff_walking/
 
-import time
-
+from typing import Tuple
+from gymnasium import Env
 import gymnasium as gym
-import numpy as np
+from strategy_q_table import QTableStrategy
 
-env = gym.make("CliffWalking-v0")# , render_mode="human")#  , render_mode="rgb_array")
 
-observation, info = env.reset()
+def prepare_env(render: bool = False) -> Tuple[Env, int, int]:
+    '''
+    Returns a reset cliff walk environment either (with or without rendering)
+    with its initial obsevation.
+    '''
+    if render:
+        env = gym.make("CliffWalking-v0", render_mode="human")
+    else:
+        env = gym.make("CliffWalking-v0")
 
-q_table = np.zeros((env.observation_space.n, env.action_space.n))
-steps_till_goal = 0
-render = False
+    init_observation, info = env.reset()
+
+    return env, init_observation
+
+
+env, init_observation = prepare_env(render=False)
+observation = init_observation
+
+strategy = QTableStrategy(env.observation_space.n, env.action_space.n)
+
+# Training loop
 for _ in range(10000):
-    #action = env.action_space.sample()  # agent policy that uses the observation and info
-    action = np.argmax(q_table[observation])
-    new_observation, reward, terminated, truncated, info = env.step(action)
-    if terminated:
-        reward = 100
+    env, observation = strategy.step(env, observation, train=True)
+print(strategy)
 
-    q_table[observation, action] = reward + np.max(q_table[new_observation])
-
-    observation = new_observation
-    # env.render()
-    steps_till_goal += 1
-    print(q_table)
-
-    if terminated or truncated or reward == - 100:
-        observation, info = env.reset()
-        print(f"terminated in {steps_till_goal} steps", reward, observation, terminated)
-        steps_till_goal = 0
-        
-    
-    
-        #env = gym.make("CliffWalking-v0", render_mode="human")
-        #observation, info = env.reset()
-
+# Test loop
+env, init_observation = prepare_env(render=True)
+observation = init_observation
+env, observation = strategy.step(env, observation, train=False)
+while observation != init_observation:
+    env, observation = strategy.step(env, observation, train=False)
 
 env.close()
