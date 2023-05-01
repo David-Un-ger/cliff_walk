@@ -3,7 +3,7 @@
 from typing import Tuple
 from gymnasium import Env
 import gymnasium as gym
-from strategy_q_table import QTableStrategy
+from strategy_tdl import SimpleQLearningStrategy, QLearningStrategy, TDLStrategy
 
 
 def prepare_env(render: bool = False) -> Tuple[Env, int, int]:
@@ -24,12 +24,16 @@ def prepare_env(render: bool = False) -> Tuple[Env, int, int]:
 env, init_observation = prepare_env(render=False)
 observation = init_observation
 
-strategy = QTableStrategy(env.observation_space.n, env.action_space.n)
+# strategy = SimpleQLearningStrategy(env.observation_space.n, env.action_space.n)
+strategy = QLearningStrategy(env.observation_space.n,
+                             env.action_space.n,
+                             alpha=0.5,
+                             gamma=1.0)
 
 # Training loop
 for _ in range(10000):
     env, observation = strategy.step(env, observation, train=True)
-print(strategy)
+print("finale Q-table:\n", strategy)
 
 # Test loop
 env, init_observation = prepare_env(render=True)
