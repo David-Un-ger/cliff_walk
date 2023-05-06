@@ -14,8 +14,11 @@ class TDLStrategy(Strategy, ABC):
                        reward: int):
     '''
 
-    def __init__(self, nr_observations: int, nr_actions: int):
-        super().__init__()
+    def __init__(self,
+                 nr_observations: int,
+                 nr_actions: int,
+                 name: str = "Temporal Difference Learning"):
+        super().__init__(name)
         self.q_table = np.zeros((nr_observations, nr_actions))
 
     def get_action(self, curr_obs: int) -> int:
@@ -40,11 +43,11 @@ class TDLStrategy(Strategy, ABC):
 
         If training is activated the Q-table is updated based on the reward.
         '''
-        self.training_steps_taken += 1
-
         action = self.get_action(curr_obs)
 
         new_observation, reward, terminated, _, _ = env.step(action)
+
+        cancelled = reward == -100
 
         if terminated:
             reward = 100
@@ -52,10 +55,7 @@ class TDLStrategy(Strategy, ABC):
         if train:
             self.update_q_table(action, curr_obs, new_observation, reward)
 
-        if terminated or reward == -100:
-            new_observation, _ = env.reset()
-
-        return env, new_observation
+        return env, new_observation, cancelled, terminated
 
     def __str__(self):
         return f"{self.q_table}"
@@ -68,7 +68,7 @@ class SimpleQLearningStrategy(TDLStrategy):
     '''
 
     def __init__(self, nr_observations: int, nr_actions):
-        super().__init__(nr_observations, nr_actions)
+        super().__init__(nr_observations, nr_actions, "Simple Q Learning")
 
     def update_q_table(self, action: int, curr_obs: int, new_observation: int,
                        reward: int):
@@ -83,7 +83,7 @@ class QLearningStrategy(TDLStrategy):
 
     def __init__(self, nr_observations: int, nr_actions, alpha: int,
                  gamma: int):
-        super().__init__(nr_observations, nr_actions)
+        super().__init__(nr_observations, nr_actions, "Q Learning")
         self.alpha = alpha
         self.gamma = gamma
 

@@ -7,9 +7,14 @@ readme = "README.md"
 packages = [{include = "cliff_walk"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.8.1"
 gymnasium = {extras = ["toy-text"], version = "^0.28.1"}
+matplotlib = "^3.7.1"
+pandas = "^2.0.1"
 
+
+[tool.poetry.group.dev.dependencies]
+yapf = "^0.33.0"
 
 [build-system]
 requires = ["poetry-core"]
